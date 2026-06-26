@@ -17,22 +17,20 @@ pub trait Users {
 
 #[derive(Clone)]
 pub struct User {
-    user_uuid: Arc<String>,
-    username: Arc<String>,
+    user_uuid: String,
+    username: String,
     password: String,
 }
 
 #[derive(Default)]
 pub struct UsersImpl {
-    uuid_to_user: HashMap<Arc<String>, Arc<User>>,
-    username_to_user: HashMap<Arc<String>, Arc<User>>,
+    uuid_to_user: HashMap<String, Arc<User>>,
+    username_to_user: HashMap<String, Arc<User>>,
 }
 
 impl Users for UsersImpl {
     fn create_user(&mut self, username: String, password: String) -> Result<(), String> {
-        let username = Arc::new(username);
-
-        if self.username_to_user.contains_key(username.as_ref()) {
+        if self.username_to_user.contains_key(&username) {
             return Err(format!("Username: {}, already exists", username));
         }
 
@@ -44,36 +42,37 @@ impl Users for UsersImpl {
             .to_string();
 
         let user: Arc<User> = Arc::new(User {
-            user_uuid: Arc::new(Uuid::new_v4().to_string()),
-            username: Arc::clone(&username),
+            user_uuid: Uuid::new_v4().to_string(),
+            username: username.clone(),
             password: hashed_password,
         });
 
         self.uuid_to_user
-            .insert(Arc::clone(&user.user_uuid), Arc::clone(&user));
-        self.username_to_user
-            .insert(Arc::clone(&username), Arc::clone(&user));
+            .insert(user.user_uuid.clone(), Arc::clone(&user));
+        self.username_to_user.insert(username, Arc::clone(&user));
 
         Ok(())
     }
 
     fn get_user_uuid(&self, username: &str, password: &str) -> Option<String> {
-        let user: &User = todo!(); // Retrieve `User` or return `None` is user can't be found.
+        let user: &User = self.username_to_user.get(username)?;
 
-        // Get user's password as `PasswordHash` instance.
-        let hashed_password = user.password.clone();
+        let hashed_password = &user.password;
         let parsed_hash = PasswordHash::new(&hashed_password).ok()?;
 
-        // Verify passed in password matches user's password.
         let result = Pbkdf2.verify_password(password.as_bytes(), &parsed_hash);
 
-        // TODO: If the username and password passed in matches the user's username and password return the user's uuid.
+        if result.is_ok() {
+            return Some(user.user_uuid.to_string());
+        }
 
         None
     }
 
     fn delete_user(&mut self, user_uuid: String) {
-        // TODO: Remove user from `username_to_user` and `uuid_to_user`.
+        if let Some(user) = self.uuid_to_user.remove(&user_uuid) {
+            self.username_to_user.remove(&user.username);
+        }
     }
 }
 
