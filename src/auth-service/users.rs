@@ -2,6 +2,7 @@ use pbkdf2::{
     Pbkdf2,
     password_hash::{PasswordHash, PasswordHasher, PasswordVerifier, SaltString},
 };
+use std::sync::Arc;
 
 use rand_core::OsRng;
 use uuid::Uuid;
@@ -16,20 +17,22 @@ pub trait Users {
 
 #[derive(Clone)]
 pub struct User {
-    user_uuid: String,
-    username: String,
+    user_uuid: Arc<String>,
+    username: Arc<String>,
     password: String,
 }
 
 #[derive(Default)]
 pub struct UsersImpl {
-    uuid_to_user: HashMap<String, User>,
-    username_to_user: HashMap<String, User>,
+    uuid_to_user: HashMap<Arc<String>, Arc<User>>,
+    username_to_user: HashMap<Arc<String>, Arc<User>>,
 }
 
 impl Users for UsersImpl {
     fn create_user(&mut self, username: String, password: String) -> Result<(), String> {
-        if self.username_to_user.contains_key(&username) {
+        let username = Arc::new(username);
+
+        if self.username_to_user.contains_key(username.as_ref()) {
             return Err(format!("Username: {}, already exists", username));
         }
 
@@ -40,15 +43,16 @@ impl Users for UsersImpl {
             .map_err(|e| format!("Failed to hash password.\n{e:?}"))?
             .to_string();
 
-        let user: User = User {
-            user_uuid: Uuid::new_v4().to_string(),
-            username: username.clone(),
+        let user: Arc<User> = Arc::new(User {
+            user_uuid: Arc::new(Uuid::new_v4().to_string()),
+            username: Arc::clone(&username),
             password: hashed_password,
-        };
+        });
 
         self.uuid_to_user
-            .insert(user.user_uuid.clone(), user.clone());
-        self.username_to_user.insert(username, user);
+            .insert(Arc::clone(&user.user_uuid), Arc::clone(&user));
+        self.username_to_user
+            .insert(Arc::clone(&username), Arc::clone(&user));
 
         Ok(())
     }
