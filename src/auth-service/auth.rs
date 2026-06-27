@@ -108,9 +108,14 @@ impl Auth for AuthService {
 
         let req = request.into_inner();
 
-        // TODO: Delete session using `sessions_service`.
+        self.sessions_service
+            .lock()
+            .expect("Lock is poisoned")
+            .delete_session(&req.session_token);
 
-        let reply: SignOutResponse = todo!(); // Create `SignOutResponse` with `status_code` set to `Success`
+        let reply: SignOutResponse = SignOutResponse {
+            status_code: StatusCode::Success.into(),
+        };
 
         Ok(Response::new(reply))
     }
