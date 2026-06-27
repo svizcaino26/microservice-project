@@ -16,7 +16,6 @@ impl Sessions for SessionsImpl {
     fn create_session(&mut self, user_uuid: &str) -> String {
         let session: String = Uuid::new_v4().to_string();
 
-        // TODO: Insert session into `uuid_to_session`.
         self.uuid_to_session
             .insert(user_uuid.to_string(), session.clone());
 
@@ -24,7 +23,7 @@ impl Sessions for SessionsImpl {
     }
 
     fn delete_session(&mut self, user_uuid: &str) {
-        // TODO: Delete session from `uuid_to_session`.
+        self.uuid_to_session.remove(user_uuid);
     }
 }
 
