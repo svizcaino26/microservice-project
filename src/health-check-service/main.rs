@@ -37,7 +37,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
         // ---------------------------------------------
 
-        let request: Request<SignInRequest> = Request::new(SignInRequest { username, password });
+        let request: Request<SignInRequest> = Request::new(SignInRequest { username: username.clone(), password });
 
         // Make a sign in request. Propagate any errors. Convert Response<SignInResponse> into SignInResponse.
         let response: SignInResponse = client.sign_in(request).await?.into_inner();
@@ -49,13 +49,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
         // ---------------------------------------------
 
-        let request: Request<SignOutRequest> = todo!(); // Create a new `SignOutRequest`.
+        let request: Request<SignOutRequest> = Request::new(SignOutRequest { session_token: username });
 
-        let response: Response<SignOutResponse> = todo!(); // Make a sign out request. Propagate any errors.
+        let response: Response<SignOutResponse> = client.sign_out(request).await?;
 
         println!(
             "SIGN OUT RESPONSE STATUS: {:?}",
-            todo!() // Log response status_code
+            StatusCode::from_i32(response.into_inner().status_code)
         );
 
         println!("--------------------------------------",);
