@@ -22,12 +22,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut client = AuthClient::connect(format!("http://{}:50051", auth_hostname)).await?;
 
     loop {
-        let username: String = todo!(); // Create random username using new_v4()
-        let password: String = todo!(); // Create random password using new_v4()
+        let username: String = Uuid::new_v4().to_string();
+        let password: String = Uuid::new_v4().to_string();
 
-        let request: Request<SignUpRequest> = todo!(); // Create a new `SignUpRequest`.
+        let request: Request<SignUpRequest> = Request::new(SignUpRequest { username, password });
 
-        let response: Response<SignUpResponse> = todo!(); // Make a sign up request. Propagate any errors.
+        let response: Response<SignUpResponse> = client.sign_up(request).await?;
 
         // Log the response
         println!(
