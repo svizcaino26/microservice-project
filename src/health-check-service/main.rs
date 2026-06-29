@@ -25,7 +25,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         let username: String = Uuid::new_v4().to_string();
         let password: String = Uuid::new_v4().to_string();
 
-        let request: Request<SignUpRequest> = Request::new(SignUpRequest { username, password });
+        let request: Request<SignUpRequest> = Request::new(SignUpRequest { username: username.clone(), password: password.clone() });
 
         let response: Response<SignUpResponse> = client.sign_up(request).await?;
 
@@ -37,14 +37,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
         // ---------------------------------------------
 
-        let request: Request<SignInRequest> = todo!(); // Create a new `SignInRequest`.
+        let request: Request<SignInRequest> = Request::new(SignInRequest { username, password });
 
         // Make a sign in request. Propagate any errors. Convert Response<SignInResponse> into SignInResponse.
-        let response: SignInResponse = todo!();
+        let response: SignInResponse = client.sign_in(request).await?.into_inner();
 
         println!(
             "SIGN IN RESPONSE STATUS: {:?}",
-            todo!() // Log response status_code
+            StatusCode::from_i32(response.status_code)
         );
 
         // ---------------------------------------------
