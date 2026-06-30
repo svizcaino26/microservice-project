@@ -49,7 +49,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     match &cli.command {
         Some(Commands::SignIn { username, password }) => {
-            let request: Request<SignInRequest> = Request::new(SignInRequest { username: username.to_owned(), password: password.to_owned()}); // Create a new `SignInRequest`.
+            let request: Request<SignInRequest> = Request::new(SignInRequest { username: username.into(), password: password.into()}); // Create a new `SignInRequest`.
         
             // Make a sign in request. Propagate any errors. Convert Response<SignInResponse> into SignInResponse.
             let response: SignInResponse = client.sign_in(request).await?.into_inner();
@@ -57,9 +57,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             println!("{:?}", response);
         }
         Some(Commands::SignUp { username, password }) => {
-            let request: Request<SignUpRequest> = todo!(); // Create a new `SignUpRequest`.
+            let request: Request<SignUpRequest> = Request::new(SignUpRequest { username: username.into(), password: password.into() }); // Create a new `SignUpRequest`.
         
-            let response: Response<SignUpResponse> = todo!(); // Make a sign up request. Propagate any errors.
+            let response: Response<SignUpResponse> = client.sign_up(request).await?; // Make a sign up request. Propagate any errors.
         
             println!("{:?}", response.into_inner());
         }
