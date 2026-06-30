@@ -64,9 +64,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             println!("{:?}", response.into_inner());
         }
         Some(Commands::SignOut { session_token }) => {
-            let request: Request<SignOutRequest> = todo!(); // Create a new `SignOutRequest`.
+            let request: Request<SignOutRequest> = Request::new(SignOutRequest { session_token: session_token.into() }); // Create a new `SignOutRequest`.
         
-            let response: Response<SignOutResponse> = todo!(); // Make a sign out request. Propagate any errors.
+            let response: Response<SignOutResponse> = client.sign_out(request).await?; // Make a sign out request. Propagate any errors.
         
             println!("{:?}", response.into_inner());
         }
